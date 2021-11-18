@@ -1,0 +1,67 @@
+#coding=utf-8
+import os
+import subprocess
+
+# Get video_file's duration in seconds from its ffmpeg output message
+# Return 0 if error
+def video_duration(video_file):
+    ffmpegcmd = '"c:\Program Files (x86)\FormatFactory\\ffmpeg.exe\"'
+    # I dont know how to set encoding when call popen(). Use temp file instead.
+    temp_file = 'cal_duration.tmp'
+    if len(video_file) == 0:
+        return 0
+    cmd = ffmpegcmd + " -i " + '"' + video_file + '"' + " > " + temp_file + " 2>&1"
+    print(cmd)
+
+    #ps = subprocess.Popen(cmd)
+    #ps.wait()
+
+    f = os.popen(cmd)
+    f.read()
+
+    with open(temp_file, "r", encoding="utf-8") as f:
+        buf = f.read()
+    #print(buf)
+    # Start to parser output message of ffmpeg
+    # Duration: 02:07:19.31, start: 0.000000, bitrate: 19609 kb/s
+    duration_keystr = "Duration: "
+    duration_index = buf.find(duration_keystr)
+    if duration_index == -1:
+        return 0
+    comma_index = buf.find(",", duration_index)
+    if comma_index == -1:
+        return 0
+    duration_str = buf[duration_index+len(duration_keystr):comma_index]
+    print("Duration: is at %d comma is at %d" % (duration_index, comma_index))
+    print(duration_str)
+
+    # Start to parser duration string
+    duration_arr = duration_str.split(":")
+    hour = int(duration_arr[0])
+    min = int(duration_arr[1])
+    sec = int(duration_arr[2].split(".")[0])
+    total = hour*3600 + min*60 + sec
+    print("Hour is %d Min is %d Sec is %d Total is %d sec" %
+          (hour, min, sec, total))
+
+    return total
+
+# Try to calculate total duration of all video files
+def cal_total_duration(file_dir):
+    video_exts = [".mp4", ".mkv"]
+    total_duration = 0
+    for root, dirs, files in os.walk(file_dir):
+        for file in files:
+            for video_ext in video_exts:
+                if os.path.splitext(file)[1] == video_ext:
+                    filename = os.path.join(root, file)
+                    print(filename)
+                    total_duration += video_duration(filename)
+                    print("total_duration is %d sec" %(total_duration))
+                    break
+    return total_duration
+
+
+video_sec = cal_total_duration(".")
+print("Total duration of all video files is %d Sec" %(video_sec))
+
