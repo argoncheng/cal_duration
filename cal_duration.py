@@ -11,7 +11,7 @@ def video_duration(video_file):
     if len(video_file) == 0:
         return 0
     cmd = ffmpegcmd + " -i " + '"' + video_file + '"' + " > " + temp_file + " 2>&1"
-    print(cmd)
+    #print(cmd)
 
     #ps = subprocess.Popen(cmd)
     #ps.wait()
@@ -32,7 +32,7 @@ def video_duration(video_file):
     if comma_index == -1:
         return 0
     duration_str = buf[duration_index+len(duration_keystr):comma_index]
-    print("Duration: is at %d comma is at %d" % (duration_index, comma_index))
+    #print("Duration: is at %d comma is at %d" % (duration_index, comma_index))
     print(duration_str)
 
     # Start to parser duration string
@@ -41,8 +41,7 @@ def video_duration(video_file):
     min = int(duration_arr[1])
     sec = int(duration_arr[2].split(".")[0])
     total = hour*3600 + min*60 + sec
-    print("Hour is %d Min is %d Sec is %d Total is %d sec" %
-          (hour, min, sec, total))
+    #print("Hour is %d Min is %d Sec is %d Total is %d sec" %(hour, min, sec, total))
 
     return total
 
@@ -57,11 +56,14 @@ def cal_total_duration(file_dir):
                     filename = os.path.join(root, file)
                     print(filename)
                     total_duration += video_duration(filename)
-                    print("total_duration is %d sec" %(total_duration))
+                    #print("total_duration is %d sec" %(total_duration))
                     break
     return total_duration
 
 
 video_sec = cal_total_duration(".")
-print("Total duration of all video files is %d Sec" %(video_sec))
+hour = int(video_sec/3600)
+min = int((video_sec - hour * 3600)/60)
+sec = video_sec - hour * 3600 - min * 60
+print("Total duration of all video files is %02d:%02d:%02d" %(hour, min, sec))
 
