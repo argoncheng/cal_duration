@@ -21,6 +21,7 @@ def video_duration(video_file):
 
     with open(temp_file, "r", encoding="utf-8") as f:
         buf = f.read()
+    os.remove(temp_file)
     #print(buf)
     # Start to parser output message of ffmpeg
     # Duration: 02:07:19.31, start: 0.000000, bitrate: 19609 kb/s
