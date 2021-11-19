@@ -61,10 +61,14 @@ def cal_total_duration(file_dir):
                     break
     return total_duration
 
+def main():
+    video_sec = cal_total_duration(".")
+    hour = int(video_sec/3600)
+    min = int((video_sec - hour * 3600)/60)
+    sec = video_sec - hour * 3600 - min * 60
+    print("Total duration of all video files is %02d:%02d:%02d" %(hour, min, sec))
 
-video_sec = cal_total_duration(".")
-hour = int(video_sec/3600)
-min = int((video_sec - hour * 3600)/60)
-sec = video_sec - hour * 3600 - min * 60
-print("Total duration of all video files is %02d:%02d:%02d" %(hour, min, sec))
 
+if __name__ == '__main__':
+    main()
+    
