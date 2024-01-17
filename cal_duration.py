@@ -1,16 +1,22 @@
 #coding=utf-8
 import os
 import subprocess
+import sys
+
 
 # Get video_file's duration in seconds from its ffmpeg output message
 # Return 0 if error
 def video_duration(video_file):
-    ffmpegcmd = '"c:\Program Files (x86)\FormatFactory\\ffmpeg.exe\"'
+    ffmpegcmd = 'c:\Program Files (x86)\FormatFactory\\ffmpeg.exe'
     # I dont know how to set encoding when call popen(). Use temp file instead.
     temp_file = 'cal_duration.tmp'
     if len(video_file) == 0:
         return 0
-    cmd = ffmpegcmd + " -i " + '"' + video_file + '"' + " > " + temp_file + " 2>&1"
+    if not os.path.exists(ffmpegcmd):
+        print(f"{ffmpegcmd} 文件不存在!")
+        sys.exit(1)
+
+    cmd = '"' + ffmpegcmd + '"' + " -i " + '"' + video_file + '"' + " > " + temp_file + " 2>&1"
     #print(cmd)
 
     #ps = subprocess.Popen(cmd)
@@ -29,12 +35,12 @@ def video_duration(video_file):
     duration_index = buf.find(duration_keystr)
     if duration_index == -1:
         return 0
-    comma_index = buf.find(",", duration_index)
-    if comma_index == -1:
+    dot_index = buf.find(".", duration_index)
+    if dot_index == -1:
         return 0
-    duration_str = buf[duration_index+len(duration_keystr):comma_index]
-    #print("Duration: is at %d comma is at %d" % (duration_index, comma_index))
-    print(duration_str)
+    duration_str = buf[duration_index+len(duration_keystr):dot_index]
+    #print("Duration: is at %d comma is at %d" % (duration_index, dot_index))
+    print(f"{duration_str} {video_file}")
 
     # Start to parser duration string
     duration_arr = duration_str.split(":")
@@ -55,7 +61,6 @@ def cal_total_duration(file_dir):
             for video_ext in video_exts:
                 if os.path.splitext(file)[1] == video_ext:
                     filename = os.path.join(root, file)
-                    print(filename)
                     total_duration += video_duration(filename)
                     #print("total_duration is %d sec" %(total_duration))
                     break
@@ -71,4 +76,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
+
