@@ -40,7 +40,7 @@ def video_duration(video_file):
         return 0
     duration_str = buf[duration_index+len(duration_keystr):dot_index]
     #print("Duration: is at %d comma is at %d" % (duration_index, dot_index))
-    print(f"{duration_str} {video_file}")
+    print(f"{duration_str} {os.path.basename(video_file)}")
 
     # Start to parser duration string
     duration_arr = duration_str.split(":")
