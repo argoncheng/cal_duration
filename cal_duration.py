@@ -15,6 +15,9 @@ def video_duration(video_file):
     if not os.path.exists(ffmpegcmd):
         print(f"{ffmpegcmd} 文件不存在!")
         sys.exit(1)
+    new_video_file = video_file.replace('【私人订制加微信：412642105 或 公众号：四小圈】', '')
+    os.rename(video_file, new_video_file)
+    video_file = new_video_file
 
     cmd = '"' + ffmpegcmd + '"' + " -i " + '"' + video_file + '"' + " > " + temp_file + " 2>&1"
     #print(cmd)
