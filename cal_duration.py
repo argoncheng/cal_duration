@@ -5,16 +5,17 @@
 如果未提供目录参数，则分析当前目录；如果提供目录参数，则分析指定目录。
 """
 import argparse
-try:
-    import ffmpeg
-except ImportError:
-    print('请先安装 ffmpeg-python 库：pip install ffmpeg-python')
-    sys.exit(1)
 import os
 import sys
 
+try:
+    import cv2
+except ImportError:
+    print('请先安装 opencv-python 库：pip install opencv-python')
+    sys.exit(1)
 
-# Get video_file's duration in seconds from its ffmpeg metadata
+
+# Get video_file's duration in seconds using OpenCV
 # Return 0 if error
 def video_duration(video_file):
     if len(video_file) == 0:
@@ -23,19 +24,21 @@ def video_duration(video_file):
         print(f"视频文件不存在: {video_file}")
         return 0
 
-    try:
-        metadata = ffmpeg.probe(video_file)
-    except ffmpeg.Error as err:
-        stderr = err.stderr.decode('utf-8', errors='replace') if isinstance(err.stderr, bytes) else str(err.stderr)
-        print(f"无法获取视频信息: {video_file}\n{stderr}")
+    cap = cv2.VideoCapture(video_file)
+    if not cap.isOpened():
+        print(f"无法打开视频文件: {video_file}")
         return 0
 
-    duration_str = metadata.get('format', {}).get('duration')
-    if duration_str is None:
+    frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    cap.release()
+
+    if fps <= 0 or frame_count <= 0:
+        print(f"无法获取视频时长: {video_file}")
         return 0
 
-    duration_float = float(duration_str)
-    total = int(duration_float)
+    duration_float = frame_count / fps
+    total = int(duration_float + 0.5)
     hour = total // 3600
     minute = (total % 3600) // 60
     sec = total % 60
