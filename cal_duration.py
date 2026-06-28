@@ -48,18 +48,23 @@ def video_duration(video_file):
 # Try to calculate total duration of all video files
 # 计算给定文件夹中所有视频文件的总时长。
 # 参数：#     file_dir (str): 包含视频文件的文件夹路径。
+#         recursive (bool): 是否递归遍历子目录。
 # 返回：
 #     int: 所有视频文件的总时长(以秒为单位)。
-def cal_total_duration(file_dir):
-    video_exts = [".mp4", ".mkv"]
+def cal_total_duration(file_dir, recursive=True):
+    video_exts = [".mp4", ".mkv", ".flv"]
     total_duration = 0
-    for root, dirs, files in os.walk(file_dir):
+    if recursive:
+        walk_dirs = os.walk(file_dir)
+    else:
+        walk_dirs = [(file_dir, [], [f for f in os.listdir(file_dir) if os.path.isfile(os.path.join(file_dir, f))])]
+
+    for root, dirs, files in walk_dirs:
         for file in files:
             for video_ext in video_exts:
-                if os.path.splitext(file)[1] == video_ext:
+                if os.path.splitext(file)[1].lower() == video_ext:
                     filename = os.path.join(root, file)
                     total_duration += video_duration(filename)
-                    #print("total_duration is %d sec" %(total_duration))
                     break
     return total_duration
 
@@ -74,6 +79,11 @@ def main():
         default='.',
         help='要分析的视频文件目录，默认当前目录'
     )
+    parser.add_argument(
+        '--no-subdirs',
+        action='store_true',
+        help='只扫描当前目录，不遍历子目录'
+    )
     args = parser.parse_args()
 
     target_dir = args.directory
@@ -81,7 +91,7 @@ def main():
         print(f"目录不存在: {target_dir}")
         sys.exit(1)
 
-    video_sec = cal_total_duration(target_dir)
+    video_sec = cal_total_duration(target_dir, recursive=not args.no_subdirs)
     hour = int(video_sec / 3600)
     minute = int((video_sec - hour * 3600) / 60)
     sec = video_sec - hour * 3600 - minute * 60
